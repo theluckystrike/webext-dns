@@ -1,7 +1,7 @@
 {
   "name": "webext-dns",
   "version": "1.0.0",
-  "description": "A TypeScript-friendly wrapper for the Chrome DNS API",
+  "description": "Typed DNS resolution helpers for Chrome extensions. Part of @zovo/webext.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -15,7 +15,14 @@
   "keywords": [
     "chrome-extension",
     "dns",
-    "typescript"
+    "resolve",
+    "hostname",
+    "typescript",
+    "webextension",
+    "browser-extension",
+    "manifest-v3",
+    "ip-address",
+    "network"
   ],
   "author": "theluckystrike",
   "license": "MIT",

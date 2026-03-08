@@ -1,6 +1,29 @@
+<div align="center">
+
 # webext-dns
 
-A TypeScript-friendly wrapper for the Chrome DNS API.
+Typed DNS resolution helpers for Chrome extensions. Resolve hostnames, check reachability, and batch-resolve with full TypeScript support.
+
+[![npm version](https://img.shields.io/npm/v/webext-dns)](https://www.npmjs.com/package/webext-dns)
+[![npm downloads](https://img.shields.io/npm/dm/webext-dns)](https://www.npmjs.com/package/webext-dns)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/webext-dns)
+
+[Installation](#installation) · [Quick Start](#quick-start) · [API](#api) · [License](#license)
+
+</div>
+
+---
+
+## Features
+
+- **Resolve hostnames** -- get IP addresses for any hostname
+- **Reachability check** -- test if a hostname can be resolved
+- **Batch resolution** -- resolve multiple hostnames in parallel
+- **Typed** -- full TypeScript return types
+- **Promise-based** -- async/await for all operations
+- **Error handling** -- clear errors when resolution fails
 
 ## Installation
 
@@ -8,37 +31,71 @@ A TypeScript-friendly wrapper for the Chrome DNS API.
 npm install webext-dns
 ```
 
-## Usage
+<details>
+<summary>Other package managers</summary>
+
+```bash
+pnpm add webext-dns
+# or
+yarn add webext-dns
+```
+
+</details>
+
+## Quick Start
 
 ```typescript
-import { DNS } from 'webext-dns';
+import { DNS } from "webext-dns";
 
-// Resolve a hostname
-try {
-  const address = await DNS.resolve('example.com');
-  console.log('IP address:', address);
-} catch (error) {
-  console.error('Failed to resolve:', error.message);
-}
-
-// Check if a hostname can be resolved
-const canResolve = await DNS.canResolve('google.com');
-
-// Resolve multiple hostnames
-const results = await DNS.resolveMany(['google.com', 'github.com']);
+const ip = await DNS.resolve("example.com");
+const canResolve = await DNS.canResolve("google.com");
+const results = await DNS.resolveMany(["google.com", "github.com"]);
 ```
 
 ## API
 
-### `DNS.resolve(hostname)`
-Resolves a hostname into an IP address. Returns a Promise that resolves with the IP address.
+| Method | Description |
+|--------|-------------|
+| `resolve(hostname)` | Resolve a hostname to an IP address |
+| `canResolve(hostname)` | Check if a hostname can be resolved |
+| `resolveMany(hostnames)` | Resolve multiple hostnames in parallel |
 
-### `DNS.canResolve(hostname)`
-Checks if a hostname can be resolved. Returns a Promise that resolves with a boolean.
+## Permissions
 
-### `DNS.resolveMany(hostnames)`
-Resolves multiple hostnames in parallel. Returns a Promise that resolves with a Record of hostnames and their IP addresses (or null if resolution failed).
+```json
+{ "permissions": ["dns"] }
+```
+
+## Part of @zovo/webext
+
+This package is part of the [@zovo/webext](https://github.com/theluckystrike) family -- typed, modular utilities for Chrome extension development:
+
+| Package | Description |
+|---------|-------------|
+| [webext-storage](https://github.com/theluckystrike/webext-storage) | Typed storage with schema validation |
+| [webext-messaging](https://github.com/theluckystrike/webext-messaging) | Type-safe message passing |
+| [webext-tabs](https://github.com/theluckystrike/webext-tabs) | Tab query helpers |
+| [webext-cookies](https://github.com/theluckystrike/webext-cookies) | Promise-based cookies API |
+| [webext-i18n](https://github.com/theluckystrike/webext-i18n) | Internationalization toolkit |
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+MIT License -- see [LICENSE](LICENSE) for details.
 
 ---
 
-[zovo.one](https://zovo.one)
+<div align="center">
+
+Built by [theluckystrike](https://github.com/theluckystrike) · [zovo.one](https://zovo.one)
+
+</div>
