@@ -1,6 +1,17 @@
 # webext-dns
 
-A TypeScript-friendly wrapper for the Chrome DNS API.
+[![npm version](https://img.shields.io/npm/v/webext-dns.svg)](https://www.npmjs.com/package/webext-dns)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Last commit](https://img.shields.io/github/last-commit/theluckystrike/webext-dns)](https://github.com/theluckystrike/webext-dns/commits/main)
+
+A TypeScript-friendly wrapper for the Chrome DNS API. Simplify hostname resolution in your Chrome extensions with a clean, promise-based API.
+
+## Features
+
+- **Promise-based API** — Native async/await support
+- **TypeScript native** — Full type definitions included
+- **Multiple resolution methods** — Resolve single or multiple hostnames
+- **Lightweight** — Zero external dependencies
 
 ## Installation
 
@@ -8,12 +19,25 @@ A TypeScript-friendly wrapper for the Chrome DNS API.
 npm install webext-dns
 ```
 
+## Requirements
+
+- Chrome (or Chromium-based browser) extension
+- `"dns"` permission in your `manifest.json`
+
+```json
+{
+  "permissions": [
+    "dns"
+  ]
+}
+```
+
 ## Usage
 
 ```typescript
 import { DNS } from 'webext-dns';
 
-// Resolve a hostname
+// Resolve a hostname to an IP address
 try {
   const address = await DNS.resolve('example.com');
   console.log('IP address:', address);
@@ -23,22 +47,64 @@ try {
 
 // Check if a hostname can be resolved
 const canResolve = await DNS.canResolve('google.com');
+if (canResolve) {
+  console.log('Hostname is resolvable');
+}
 
-// Resolve multiple hostnames
-const results = await DNS.resolveMany(['google.com', 'github.com']);
+// Resolve multiple hostnames in parallel
+const results = await DNS.resolveMany(['google.com', 'github.com', 'invalid.test']);
+console.log(results);
+// {
+//   'google.com': '142.250.185.46',
+//   'github.com': '140.82.121.4',
+//   'invalid.test': null
+// }
 ```
 
-## API
+## API Reference
 
-### `DNS.resolve(hostname)`
-Resolves a hostname into an IP address. Returns a Promise that resolves with the IP address.
+### `DNS.resolve(hostname: string): Promise<string>`
 
-### `DNS.canResolve(hostname)`
-Checks if a hostname can be resolved. Returns a Promise that resolves with a boolean.
+Resolves a hostname into an IP address.
 
-### `DNS.resolveMany(hostnames)`
-Resolves multiple hostnames in parallel. Returns a Promise that resolves with a Record of hostnames and their IP addresses (or null if resolution failed).
+- **Parameters:**
+  - `hostname` (string): The hostname to resolve
+- **Returns:** `Promise<string>` — The resolved IP address
+- **Throws:** Error if resolution fails or Chrome DNS API is unavailable
+
+### `DNS.canResolve(hostname: string): Promise<boolean>`
+
+Checks if a hostname can be resolved without throwing an error.
+
+- **Parameters:**
+  - `hostname` (string): The hostname to check
+- **Returns:** `Promise<boolean>` — True if resolvable, false otherwise
+
+### `DNS.resolveMany(hostnames: string[]): Promise<Record<string, string | null>>`
+
+Resolves multiple hostnames in parallel.
+
+- **Parameters:**
+  - `hostnames` (string[]): Array of hostnames to resolve
+- **Returns:** `Promise<Record<string, string | null>>` — Object mapping hostnames to their IP addresses (or null if resolution failed)
+
+## Project Structure
+
+```
+webext-dns/
+├── src/
+│   ├── index.ts        # Main source code
+│   └── index.test.ts   # Test suite
+├── LICENSE             # MIT License
+├── package.json        # NPM package configuration
+├── tsconfig.json       # TypeScript configuration
+└── README.md          # This file
+```
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-[zovo.one](https://zovo.one)
+Built at [zovo.one](https://zovo.one) by [theluckystrike](https://github.com/theluckystrike)
