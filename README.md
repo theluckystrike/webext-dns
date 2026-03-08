@@ -9,6 +9,7 @@ Typed DNS resolution helpers for Chrome extensions — resolve hostnames, batch 
 ## Features
 
 - **Simple DNS Resolution** — Resolve hostnames to IP addresses with a clean, typed API
+- **Built-in Caching** — Automatic caching with 5-minute TTL for improved performance
 - **Batch Lookups** — Resolve multiple hostnames in parallel with `resolveMany()`
 - **TypeScript First** — Full type safety with TypeScript definitions included
 - **Error Handling** — Consistent error handling with descriptive error messages
@@ -117,6 +118,16 @@ try {
 }
 ```
 
+### Clearing the Cache
+
+The library includes built-in caching with a 5-minute TTL. You can manually clear the cache if needed:
+
+```typescript
+// Clear all cached DNS resolutions
+DNS.clearCache();
+console.log('DNS cache cleared');
+```
+
 ## API
 
 ### `DNS.resolve(hostname: string): Promise<string>`
@@ -130,6 +141,8 @@ Resolves a hostname into an IP address.
 **Returns:** `Promise<string>` — The resolved IP address
 
 **Throws:** `Error` if resolution fails
+
+**Caching:** Results are automatically cached for 5 minutes
 
 ---
 
@@ -154,6 +167,14 @@ Resolves multiple hostnames in parallel.
 | `hostnames` | `string[]` | Array of hostnames to resolve |
 
 **Returns:** `Promise<Record<string, string | null>>` — Object mapping hostnames to IP addresses (or `null` if resolution failed)
+
+---
+
+### `DNS.clearCache(): void`
+
+Clears all cached DNS resolution results.
+
+**Returns:** `void`
 
 ---
 
