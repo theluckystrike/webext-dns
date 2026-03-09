@@ -1,23 +1,19 @@
 # webext-dns
 
-<div align="center">
-
 [![npm version](https://img.shields.io/npm/v/webext-dns.svg)](https://www.npmjs.com/package/webext-dns)
-[![npm downloads](https://img.shields.io/npm/dm/webext-dns.svg)](https://www.npmjs.com/package/webext-dns)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
-[![MIT License](https://img.shields.io/npm/l/webext-dns.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Node.js >=18](https://img.shields.io/badge/Node.js->=18-339933?logo=node.js)](https://nodejs.org)
 
-</div>
-
-Typed DNS resolution helpers for Chrome extensions — resolve hostnames, batch lookups, and caching. Part of [@zovo/webext](https://github.com/theluckystrike/webext).
+Typed DNS resolution helpers for Chrome extensions — resolve hostnames, batch lookups, and caching. Part of [@zovo/webext](https://github.com/zovojs).
 
 ## Features
 
-- **Type-safe DNS resolution** — Full TypeScript support with typed return values
-- **Batch resolution** — Resolve multiple hostnames in parallel
-- **Error handling** — Graceful handling of resolution failures
-- **Chrome API integration** — Direct wrapper around the Chrome `dns` API
-- **Lightweight** — Zero runtime dependencies
+- **Simple DNS Resolution** — Resolve hostnames to IP addresses with a clean, typed API
+- **Built-in Caching** — Automatic caching with 5-minute TTL for improved performance
+- **Batch Lookups** — Resolve multiple hostnames in parallel with `resolveMany()`
+- **TypeScript First** — Full type safety with TypeScript definitions included
+- **Error Handling** — Consistent error handling with descriptive error messages
+- **Chrome API** — Built on top of the Chrome `dns` permission API
 
 ## Installation
 
@@ -25,10 +21,23 @@ Typed DNS resolution helpers for Chrome extensions — resolve hostnames, batch 
 npm install webext-dns
 ```
 
-or with pnpm:
+Or using pnpm:
 
 ```bash
 pnpm add webext-dns
+```
+
+## Requirements
+
+- Chrome extensions targeting Manifest V3
+- The `dns` permission in your `manifest.json`:
+
+```json
+{
+  "permissions": [
+    "dns"
+  ]
+}
 ```
 
 ## Usage
@@ -49,142 +58,157 @@ try {
 }
 ```
 
-### Check Resolution Capability
+### Check if Resolvable
 
 Check if a hostname can be resolved without throwing an error:
 
 ```typescript
-import { DNS } from 'webext-dns';
-
 const canResolve = await DNS.canResolve('google.com');
+
 if (canResolve) {
-  console.log('google.com is resolvable');
+  console.log('google.com can be resolved!');
 } else {
-  console.log('google.com cannot be resolved');
+  console.log('Unable to resolve google.com');
 }
 ```
 
 ### Batch Resolution
 
-Resolve multiple hostnames efficiently in parallel:
+Resolve multiple hostnames in parallel:
 
 ```typescript
-import { DNS } from 'webext-dns';
-
 const results = await DNS.resolveMany([
   'google.com',
   'github.com',
-  'example.com',
+  'example.com'
 ]);
 
 console.log(results);
 // Output:
 // {
-//   google.com: '142.250.185.14',
-//   github.com: '140.82.121.4',
-//   example.com: '93.184.216.34'
+//   'google.com': '142.250.185.78',
+//   'github.com': '140.82.121.3',
+//   'example.com': '93.184.216.34'
 // }
 
-// Failed resolutions are null
-const mixed = await DNS.resolveMany(['valid.com', 'invalid..test']);
-// { valid.com: '93.184.216.34', invalid..test: null }
+// Failed resolutions return null:
+const mixed = await DNS.resolveMany([
+  'valid-domain.com',
+  'this-does-not-exist.invalid'
+]);
+
+console.log(mixed);
+// Output:
+// {
+//   'valid-domain.com': '1.2.3.4',
+//   'this-does-not-exist.invalid': null
+// }
 ```
 
-### Using in a Chrome Extension
+### Error Handling
 
-Add the `dns` permission to your `manifest.json`:
-
-```json
-{
-  "permissions": [
-    "dns"
-  ]
-}
-```
-
-Then use in your extension code:
+The library provides descriptive error messages:
 
 ```typescript
-import { DNS } from 'webext-dns';
-
-// In your background script or service worker
-async function checkConnectivity(hostname: string) {
-  const canConnect = await DNS.canResolve(hostname);
-  return canConnect;
+try {
+  await DNS.resolve('invalid..hostname');
+} catch (error) {
+  console.error(error.message);
+  // Output: Failed to resolve hostname: invalid..hostname (Result code: 1)
 }
+```
 
-// Batch check multiple domains
-async function getServerIPs(domains: string[]) {
-  const ips = await DNS.resolveMany(domains);
-  return ips;
-}
+### Clearing the Cache
+
+The library includes built-in caching with a 5-minute TTL. You can manually clear the cache if needed:
+
+```typescript
+// Clear all cached DNS resolutions
+DNS.clearCache();
+console.log('DNS cache cleared');
 ```
 
 ## API
 
-| Method | Description | Returns |
-|--------|-------------|---------|
-| `DNS.resolve(hostname)` | Resolves a hostname to an IP address | `Promise<string>` |
-| `DNS.canResolve(hostname)` | Checks if a hostname can be resolved | `Promise<boolean>` |
-| `DNS.resolveMany(hostnames)` | Resolves multiple hostnames in parallel | `Promise<Record<string, string \| null>>` |
-
-### `DNS.resolve(hostname)`
+### `DNS.resolve(hostname: string): Promise<string>`
 
 Resolves a hostname into an IP address.
 
-- **hostname** (`string`): The hostname to resolve
-- **Returns**: `Promise<string>` - The resolved IP address
-- **Throws**: `Error` if resolution fails
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `hostname` | `string` | The hostname to resolve |
 
-### `DNS.canResolve(hostname)`
+**Returns:** `Promise<string>` — The resolved IP address
 
-Checks if a hostname can be resolved without throwing an error.
+**Throws:** `Error` if resolution fails
 
-- **hostname** (`string`): The hostname to check
-- **Returns**: `Promise<boolean>` - `true` if resolvable, `false` otherwise
-
-### `DNS.resolveMany(hostnames)`
-
-Resolves multiple hostnames in parallel for efficient batch operations.
-
-- **hostnames** (`string[]`): Array of hostnames to resolve
-- **Returns**: `Promise<Record<string, string | null>>` - Object with hostnames as keys and IP addresses (or `null` for failed resolutions) as values
-
-## Permissions
-
-This library requires the `dns` permission in your Chrome extension's `manifest.json`:
-
-```json
-{
-  "permissions": [
-    "dns"
-  ]
-}
-```
-
-## Browser Support
-
-- **Chrome** (Manifest V3) — Full support
-- **Edge** (Chromium-based) — Full support
-- **Opera** — Full support
-- **Other browsers** — Not supported (the `chrome.dns` API is Chrome-specific)
-
-> **Note**: The DNS API is only available in extension context (background scripts, service workers) and requires the `dns` permission.
-
-## Part of @zovo/webext
-
-`webext-dns` is part of the `@zovo/webext` collection of TypeScript utilities for Chrome extension development.
-
-<div align="center">
-
-**[View all @zovo/webext packages →](https://github.com/theluckystrike/webext)**
-
-</div>
+**Caching:** Results are automatically cached for 5 minutes
 
 ---
 
-<div align="center">
+### `DNS.canResolve(hostname: string): Promise<boolean>`
 
-Made with ⚡ by <a href="https://zovo.one">Zovo</a>
+Checks if a hostname can be resolved without throwing.
 
-</div>
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `hostname` | `string` | The hostname to check |
+
+**Returns:** `Promise<boolean>` — `true` if resolvable, `false` otherwise
+
+---
+
+### `DNS.resolveMany(hostnames: string[]): Promise<Record<string, string | null>>`
+
+Resolves multiple hostnames in parallel.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `hostnames` | `string[]` | Array of hostnames to resolve |
+
+**Returns:** `Promise<Record<string, string | null>>` — Object mapping hostnames to IP addresses (or `null` if resolution failed)
+
+---
+
+### `DNS.clearCache(): void`
+
+Clears all cached DNS resolution results.
+
+**Returns:** `void`
+
+---
+
+## Browser Support
+
+| Browser | Support |
+|---------|---------|
+| Chrome | ✅ Full support |
+| Edge | ✅ Full support (Chromium-based) |
+| Opera | ✅ Full support (Chromium-based) |
+| Firefox | ❌ Not supported |
+| Safari | ❌ Not supported |
+
+> **Note:** The Chrome DNS API (`chrome.dns`) is only available in Chrome extensions with the `dns` permission. This library will throw an error if used outside of a Chrome extension context.
+
+## Part of @zovo/webext
+
+webext-dns is part of the @zovo/webext collection of utilities for building Chrome extensions:
+
+- [webext-dns](https://github.com/theluckystrike/webext-dns) — DNS resolution helpers
+- [webext-storage](https://github.com/theluckystrike/webext-storage) — Typed storage utilities
+- [webext-messaging](https://github.com/theluckystrike/webext-messaging) — Type-safe messaging
+
+## License
+
+MIT © [theluckystrike](https://github.com/theluckystrike)
+
+---
+
+<p align="center">
+  <a href="https://zovo.one">
+    <img src="https://zovo.one/logo.svg" width="30" height="30" alt="Zovo" />
+  </a>
+</p>
+<p align="center">
+  Part of <a href="https://zovo.one">Zovo</a>
+</p>

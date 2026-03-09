@@ -1,47 +1,43 @@
 # Contributing to webext-dns
 
-Thank you for your interest in contributing! This guide will help you get started.
+Thank you for your interest in contributing to webext-dns! This document outlines the process for contributing to this project.
 
 ## Prerequisites
 
 - Node.js 18 or higher
 - pnpm (recommended) or npm
 
-## Development Setup
+## Getting Started
 
-1. **Fork the repository**
+### 1. Fork the repository
 
-   Click the "Fork" button on the GitHub page to create your own copy of the repository.
+Click the "Fork" button on the GitHub page to create your own copy of the repository.
 
-2. **Clone your fork**
-
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/webext-dns.git
-   cd webext-dns
-   ```
-
-3. **Install dependencies**
-
-   ```bash
-   pnpm install
-   ```
-
-4. **Create a feature branch**
-
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-## Development Workflow
-
-### Running Tests
+### 2. Clone your fork
 
 ```bash
-# Run tests once
-pnpm test
+git clone https://github.com/YOUR_USERNAME/webext-dns.git
+cd webext-dns
+```
 
-# Run tests in watch mode
-pnpm test --watch
+### 3. Install dependencies
+
+```bash
+pnpm install
+```
+
+### 4. Create a feature branch
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+## Development
+
+### Running tests
+
+```bash
+pnpm test
 ```
 
 ### Building
@@ -50,34 +46,33 @@ pnpm test --watch
 pnpm build
 ```
 
-The compiled JavaScript will be in the `dist/` directory.
-
 ## Making Changes
 
 1. Make your changes in your feature branch
-2. Add tests for new functionality
-3. Ensure all tests pass
-4. Commit your changes with a descriptive message
-5. Push to your fork
+2. Add tests for new functionality (if applicable)
+3. Ensure all tests pass: `pnpm test`
+4. Ensure the build succeeds: `pnpm build`
 
 ## Submitting a Pull Request
 
-1. Go to the [original repository](https://github.com/theluckystrike/webext-dns)
-2. Click "New Pull Request"
-3. Select your fork and branch
-4. Fill in the PR template with:
-   - Description of changes
-   - Related issue number (if applicable)
-   - Testing performed
-5. Submit the PR
+1. Push your branch to your fork:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+2. Open a pull request against the `polish` branch of the original repository
+
+3. Fill out the PR template with:
+   - A clear description of your changes
+   - Any related issues or PRs
+   - Screenshots for UI changes (if applicable)
 
 ## Code Style
 
-- Use TypeScript
-- Follow existing code patterns
-- Add JSDoc comments for public APIs
-- Ensure type safety
+- Use TypeScript with strict mode enabled
+- Follow the existing code style
+- Write descriptive commit messages
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing to webext-dns, you agree that your contributions will be licensed under the MIT License.

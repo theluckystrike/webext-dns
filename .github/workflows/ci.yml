@@ -2,14 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, master, polish]
   pull_request:
-    branches: [main]
+    branches: [main, master, polish]
 
 jobs:
   test:
     name: Test (Node.js ${{ matrix.node-version }})
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -17,7 +16,7 @@ jobs:
         node-version: [18, 20, 22]
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup pnpm
@@ -34,8 +33,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run build
-        run: pnpm run build
-
       - name: Run tests
         run: pnpm test
+
+      - name: Build
+        run: pnpm build
