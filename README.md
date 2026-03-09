@@ -1,17 +1,23 @@
 # webext-dns
 
-[![npm version](https://img.shields.io/npm/v/webext-dns.svg)](https://www.npmjs.com/package/webext-dns)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Last commit](https://img.shields.io/github/last-commit/theluckystrike/webext-dns)](https://github.com/theluckystrike/webext-dns/commits/main)
+<div align="center">
 
-A TypeScript-friendly wrapper for the Chrome DNS API. Simplify hostname resolution in your Chrome extensions with a clean, promise-based API.
+[![npm version](https://img.shields.io/npm/v/webext-dns.svg)](https://www.npmjs.com/package/webext-dns)
+[![npm downloads](https://img.shields.io/npm/dm/webext-dns.svg)](https://www.npmjs.com/package/webext-dns)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
+[![MIT License](https://img.shields.io/npm/l/webext-dns.svg)](LICENSE)
+
+</div>
+
+Typed DNS resolution helpers for Chrome extensions — resolve hostnames, batch lookups, and caching. Part of [@zovo/webext](https://github.com/theluckystrike/webext).
 
 ## Features
 
-- **Promise-based API** — Native async/await support
-- **TypeScript native** — Full type definitions included
-- **Multiple resolution methods** — Resolve single or multiple hostnames
-- **Lightweight** — Zero external dependencies
+- **Type-safe DNS resolution** — Full TypeScript support with typed return values
+- **Batch resolution** — Resolve multiple hostnames in parallel
+- **Error handling** — Graceful handling of resolution failures
+- **Chrome API integration** — Direct wrapper around the Chrome `dns` API
+- **Lightweight** — Zero runtime dependencies
 
 ## Installation
 
@@ -19,10 +25,74 @@ A TypeScript-friendly wrapper for the Chrome DNS API. Simplify hostname resoluti
 npm install webext-dns
 ```
 
-## Requirements
+or with pnpm:
 
-- Chrome (or Chromium-based browser) extension
-- `"dns"` permission in your `manifest.json`
+```bash
+pnpm add webext-dns
+```
+
+## Usage
+
+### Basic Resolution
+
+Resolve a single hostname to an IP address:
+
+```typescript
+import { DNS } from 'webext-dns';
+
+try {
+  const address = await DNS.resolve('example.com');
+  console.log('IP address:', address);
+  // Output: IP address: 93.184.216.34
+} catch (error) {
+  console.error('Failed to resolve:', error.message);
+}
+```
+
+### Check Resolution Capability
+
+Check if a hostname can be resolved without throwing an error:
+
+```typescript
+import { DNS } from 'webext-dns';
+
+const canResolve = await DNS.canResolve('google.com');
+if (canResolve) {
+  console.log('google.com is resolvable');
+} else {
+  console.log('google.com cannot be resolved');
+}
+```
+
+### Batch Resolution
+
+Resolve multiple hostnames efficiently in parallel:
+
+```typescript
+import { DNS } from 'webext-dns';
+
+const results = await DNS.resolveMany([
+  'google.com',
+  'github.com',
+  'example.com',
+]);
+
+console.log(results);
+// Output:
+// {
+//   google.com: '142.250.185.14',
+//   github.com: '140.82.121.4',
+//   example.com: '93.184.216.34'
+// }
+
+// Failed resolutions are null
+const mixed = await DNS.resolveMany(['valid.com', 'invalid..test']);
+// { valid.com: '93.184.216.34', invalid..test: null }
+```
+
+### Using in a Chrome Extension
+
+Add the `dns` permission to your `manifest.json`:
 
 ```json
 {
@@ -32,79 +102,89 @@ npm install webext-dns
 }
 ```
 
-## Usage
+Then use in your extension code:
 
 ```typescript
 import { DNS } from 'webext-dns';
 
-// Resolve a hostname to an IP address
-try {
-  const address = await DNS.resolve('example.com');
-  console.log('IP address:', address);
-} catch (error) {
-  console.error('Failed to resolve:', error.message);
+// In your background script or service worker
+async function checkConnectivity(hostname: string) {
+  const canConnect = await DNS.canResolve(hostname);
+  return canConnect;
 }
 
-// Check if a hostname can be resolved
-const canResolve = await DNS.canResolve('google.com');
-if (canResolve) {
-  console.log('Hostname is resolvable');
+// Batch check multiple domains
+async function getServerIPs(domains: string[]) {
+  const ips = await DNS.resolveMany(domains);
+  return ips;
 }
-
-// Resolve multiple hostnames in parallel
-const results = await DNS.resolveMany(['google.com', 'github.com', 'invalid.test']);
-console.log(results);
-// {
-//   'google.com': '142.250.185.46',
-//   'github.com': '140.82.121.4',
-//   'invalid.test': null
-// }
 ```
 
-## API Reference
+## API
 
-### `DNS.resolve(hostname: string): Promise<string>`
+| Method | Description | Returns |
+|--------|-------------|---------|
+| `DNS.resolve(hostname)` | Resolves a hostname to an IP address | `Promise<string>` |
+| `DNS.canResolve(hostname)` | Checks if a hostname can be resolved | `Promise<boolean>` |
+| `DNS.resolveMany(hostnames)` | Resolves multiple hostnames in parallel | `Promise<Record<string, string \| null>>` |
+
+### `DNS.resolve(hostname)`
 
 Resolves a hostname into an IP address.
 
-- **Parameters:**
-  - `hostname` (string): The hostname to resolve
-- **Returns:** `Promise<string>` — The resolved IP address
-- **Throws:** Error if resolution fails or Chrome DNS API is unavailable
+- **hostname** (`string`): The hostname to resolve
+- **Returns**: `Promise<string>` - The resolved IP address
+- **Throws**: `Error` if resolution fails
 
-### `DNS.canResolve(hostname: string): Promise<boolean>`
+### `DNS.canResolve(hostname)`
 
 Checks if a hostname can be resolved without throwing an error.
 
-- **Parameters:**
-  - `hostname` (string): The hostname to check
-- **Returns:** `Promise<boolean>` — True if resolvable, false otherwise
+- **hostname** (`string`): The hostname to check
+- **Returns**: `Promise<boolean>` - `true` if resolvable, `false` otherwise
 
-### `DNS.resolveMany(hostnames: string[]): Promise<Record<string, string | null>>`
+### `DNS.resolveMany(hostnames)`
 
-Resolves multiple hostnames in parallel.
+Resolves multiple hostnames in parallel for efficient batch operations.
 
-- **Parameters:**
-  - `hostnames` (string[]): Array of hostnames to resolve
-- **Returns:** `Promise<Record<string, string | null>>` — Object mapping hostnames to their IP addresses (or null if resolution failed)
+- **hostnames** (`string[]`): Array of hostnames to resolve
+- **Returns**: `Promise<Record<string, string | null>>` - Object with hostnames as keys and IP addresses (or `null` for failed resolutions) as values
 
-## Project Structure
+## Permissions
 
-```
-webext-dns/
-├── src/
-│   ├── index.ts        # Main source code
-│   └── index.test.ts   # Test suite
-├── LICENSE             # MIT License
-├── package.json        # NPM package configuration
-├── tsconfig.json       # TypeScript configuration
-└── README.md          # This file
+This library requires the `dns` permission in your Chrome extension's `manifest.json`:
+
+```json
+{
+  "permissions": [
+    "dns"
+  ]
+}
 ```
 
-## License
+## Browser Support
 
-MIT License — see [LICENSE](LICENSE) for details.
+- **Chrome** (Manifest V3) — Full support
+- **Edge** (Chromium-based) — Full support
+- **Opera** — Full support
+- **Other browsers** — Not supported (the `chrome.dns` API is Chrome-specific)
+
+> **Note**: The DNS API is only available in extension context (background scripts, service workers) and requires the `dns` permission.
+
+## Part of @zovo/webext
+
+`webext-dns` is part of the `@zovo/webext` collection of TypeScript utilities for Chrome extension development.
+
+<div align="center">
+
+**[View all @zovo/webext packages →](https://github.com/theluckystrike/webext)**
+
+</div>
 
 ---
 
-Built at [zovo.one](https://zovo.one) by [theluckystrike](https://github.com/theluckystrike)
+<div align="center">
+
+Made with ⚡ by <a href="https://zovo.one">Zovo</a>
+
+</div>
