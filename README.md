@@ -1,29 +1,17 @@
-<div align="center">
-
 # webext-dns
 
-Typed DNS resolution helpers for Chrome extensions. Resolve hostnames, check reachability, and batch-resolve with full TypeScript support.
+[![npm version](https://img.shields.io/npm/v/webext-dns.svg)](https://www.npmjs.com/package/webext-dns)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Last commit](https://img.shields.io/github/last-commit/theluckystrike/webext-dns)](https://github.com/theluckystrike/webext-dns/commits/main)
 
-[![npm version](https://img.shields.io/npm/v/webext-dns)](https://www.npmjs.com/package/webext-dns)
-[![npm downloads](https://img.shields.io/npm/dm/webext-dns)](https://www.npmjs.com/package/webext-dns)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/webext-dns)
-
-[Installation](#installation) · [Quick Start](#quick-start) · [API](#api) · [License](#license)
-
-</div>
-
----
+A TypeScript-friendly wrapper for the Chrome DNS API. Simplify hostname resolution in your Chrome extensions with a clean, promise-based API.
 
 ## Features
 
-- **Resolve hostnames** -- get IP addresses for any hostname
-- **Reachability check** -- test if a hostname can be resolved
-- **Batch resolution** -- resolve multiple hostnames in parallel
-- **Typed** -- full TypeScript return types
-- **Promise-based** -- async/await for all operations
-- **Error handling** -- clear errors when resolution fails
+- **Promise-based API** — Native async/await support
+- **TypeScript native** — Full type definitions included
+- **Multiple resolution methods** — Resolve single or multiple hostnames
+- **Lightweight** — Zero external dependencies
 
 ## Installation
 
@@ -31,71 +19,92 @@ Typed DNS resolution helpers for Chrome extensions. Resolve hostnames, check rea
 npm install webext-dns
 ```
 
-<details>
-<summary>Other package managers</summary>
+## Requirements
 
-```bash
-pnpm add webext-dns
-# or
-yarn add webext-dns
-```
-
-</details>
-
-## Quick Start
-
-```typescript
-import { DNS } from "webext-dns";
-
-const ip = await DNS.resolve("example.com");
-const canResolve = await DNS.canResolve("google.com");
-const results = await DNS.resolveMany(["google.com", "github.com"]);
-```
-
-## API
-
-| Method | Description |
-|--------|-------------|
-| `resolve(hostname)` | Resolve a hostname to an IP address |
-| `canResolve(hostname)` | Check if a hostname can be resolved |
-| `resolveMany(hostnames)` | Resolve multiple hostnames in parallel |
-
-## Permissions
+- Chrome (or Chromium-based browser) extension
+- `"dns"` permission in your `manifest.json`
 
 ```json
-{ "permissions": ["dns"] }
+{
+  "permissions": [
+    "dns"
+  ]
+}
 ```
 
-## Part of @zovo/webext
+## Usage
 
-This package is part of the [@zovo/webext](https://github.com/theluckystrike) family -- typed, modular utilities for Chrome extension development:
+```typescript
+import { DNS } from 'webext-dns';
 
-| Package | Description |
-|---------|-------------|
-| [webext-storage](https://github.com/theluckystrike/webext-storage) | Typed storage with schema validation |
-| [webext-messaging](https://github.com/theluckystrike/webext-messaging) | Type-safe message passing |
-| [webext-tabs](https://github.com/theluckystrike/webext-tabs) | Tab query helpers |
-| [webext-cookies](https://github.com/theluckystrike/webext-cookies) | Promise-based cookies API |
-| [webext-i18n](https://github.com/theluckystrike/webext-i18n) | Internationalization toolkit |
+// Resolve a hostname to an IP address
+try {
+  const address = await DNS.resolve('example.com');
+  console.log('IP address:', address);
+} catch (error) {
+  console.error('Failed to resolve:', error.message);
+}
 
-## Contributing
+// Check if a hostname can be resolved
+const canResolve = await DNS.canResolve('google.com');
+if (canResolve) {
+  console.log('Hostname is resolvable');
+}
 
-Contributions are welcome! Please open an issue or submit a pull request.
+// Resolve multiple hostnames in parallel
+const results = await DNS.resolveMany(['google.com', 'github.com', 'invalid.test']);
+console.log(results);
+// {
+//   'google.com': '142.250.185.46',
+//   'github.com': '140.82.121.4',
+//   'invalid.test': null
+// }
+```
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## API Reference
+
+### `DNS.resolve(hostname: string): Promise<string>`
+
+Resolves a hostname into an IP address.
+
+- **Parameters:**
+  - `hostname` (string): The hostname to resolve
+- **Returns:** `Promise<string>` — The resolved IP address
+- **Throws:** Error if resolution fails or Chrome DNS API is unavailable
+
+### `DNS.canResolve(hostname: string): Promise<boolean>`
+
+Checks if a hostname can be resolved without throwing an error.
+
+- **Parameters:**
+  - `hostname` (string): The hostname to check
+- **Returns:** `Promise<boolean>` — True if resolvable, false otherwise
+
+### `DNS.resolveMany(hostnames: string[]): Promise<Record<string, string | null>>`
+
+Resolves multiple hostnames in parallel.
+
+- **Parameters:**
+  - `hostnames` (string[]): Array of hostnames to resolve
+- **Returns:** `Promise<Record<string, string | null>>` — Object mapping hostnames to their IP addresses (or null if resolution failed)
+
+## Project Structure
+
+```
+webext-dns/
+├── src/
+│   ├── index.ts        # Main source code
+│   └── index.test.ts   # Test suite
+├── LICENSE             # MIT License
+├── package.json        # NPM package configuration
+├── tsconfig.json       # TypeScript configuration
+└── README.md          # This file
+```
 
 ## License
 
-MIT License -- see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-<div align="center">
-
-Built by [theluckystrike](https://github.com/theluckystrike) · [zovo.one](https://zovo.one)
-
-</div>
+Built at [zovo.one](https://zovo.one) by [theluckystrike](https://github.com/theluckystrike)
